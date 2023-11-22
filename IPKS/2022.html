@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+
+<!--To create a drone flight registration website. In the upper part of the web page, information about the owner -->
+<!--of the aircraft (name and surname), the name of the aircraft, the coordinates of the take-off, the radius of the flight,-->
+<!--the height of the flight and the type of the aircraft taken from the descent (Glider or Drone) are displayed. -->
+<!--When clicking the Log in button, if all fields are filled, an entry is added to the list of checked flights, and the -->
+<!--fields are reset. If all fields are not entered, an error message will start. At the same time, when entering the -->
+<!--record, the aircraft marking should be checked. It should be checked that the tag format is valid, i.e Z3 - UNR - 1234-->
+<!--(Z3 - UNR - four numbers). In addition, in order to be able to add the record, it is necessary to check that the radius-->
+<!--has a maximum value of 500 meters, and that the height of the flight does not exceed 150 m. This restriction does not-->
+<!--apply to an aircraft where the four numbers of the marking are the same. According to this data, the entries for all -->
+<!--gliders have frames around them, and for the drone entry there is a frame around it if the hang and the flight radius -->
+<!--are the same, otherwise there is none. In each entry there are also buttons, Confirm and Cancel. For each flight record,-->
+<!--when you click the Confirm button, the record turns green, and after clicking the Cancel button, the selected record is -->
+<!--deleted from view. The total number of currently registered flights is written next to the form. In addition, -->
+<!--the appearance of the site.-->
+
+
+
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        div {
+            padding: 10px;
+        }
+
+        label {
+            width: 200px;
+            display: inline-block;
+        }
+
+        li {
+            list-style-type: none;
+        }
+
+        .confirmed-entry {
+            background: green;
+            background-origin: border-box;
+            width: 300px;
+            border: 2px solid black;
+            padding: 10px;
+
+        }
+    </style>
+
+    <script>
+        var flights = 0;
+        function LogIn() {
+            var nameAndSurname = document.getElementById("NameSurname");
+            var aircraft = document.getElementById("marking");
+            var coordinates = document.getElementById("coordinates");
+            var radius = document.getElementById("radius");
+            var flightsInput = document.getElementById("height");
+            var type = document.getElementById("type");
+            var errorMessage = document.getElementById("errorMessage");
+
+            if (nameAndSurname.value === "" || aircraft.value === "" || coordinates.value === "" ||
+                radius.value === "" || flightsInput.value === "" || type.value === "") {
+                errorMessage.textContent = "Write all needed information";
+                return;
+            } else {
+                errorMessage.textContent = "";
+            }
+
+            if (!validateAircraftTag(aircraft.value)) {
+                errorMessage.textContent = "Invalid aircraft tag format";
+                return;
+            }
+
+            var flightList = document.getElementById("add");
+            var flightEntry = document.createElement("li");
+            flightEntry.innerHTML =
+                '<strong>Name:</strong>' + nameAndSurname.value + '<br>' +
+                '<strong>Aircraft:</strong>' + aircraft.value + '<br>' +
+                '<strong>Coordinates:</strong>' + coordinates.value + '<br>' +
+                '<strong>Flight Radius:</strong>' + radius.value + '<br>' +
+                '<strong>Flight Height:</strong>' + flightsInput.value + '<br>' +
+                '<strong>Type of Flight:</strong>' + type.value + '<br>' +
+                '<button onclick="confirmEntry(this)">Confirm</button>' +
+                '<button onclick="cancelEntry(this)">Cancel</button>';
+            flightList.appendChild(flightEntry);
+            flights++;
+            document.getElementById("loggedIn").textContent = flights;
+            resetForm();
+        }
+
+        function validateAircraftTag(tag) {
+            var parts = tag.split("-");
+            var numberPart = parseInt(parts[2]);
+
+            if (isNaN(numberPart)) {
+                return true;
+            } else {
+                if (tag.length !== 11 || parts[0] !== "Z3" || parts[1] !== "UNR" || !(numberPart >= 1000 && numberPart <= 9999)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        function isSameFourNumbers(tag) {
+            var numbers = tag.match(/\d{4}$/);
+
+            if (numbers) {
+                var uniqueDigits = new Set(numbers[0]);
+
+                if (uniqueDigits.size === 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        function confirmEntry(button) {
+            const flightEntry = button.parentElement;
+            flightEntry.classList.add("confirmed-entry");
+            button.remove();
+        }
+
+        function cancelEntry(button) {
+            const flightEntry = button.parentElement;
+            flightEntry.remove();
+            flights--;
+            document.getElementById("loggedIn").textContent = flights;
+        }
+
+        function resetForm() {
+            document.getElementById("flightForm").reset();
+        }
+    </script>
+</head>
+<body>
+<div>
+    <h1>Flight Registration</h1>
+</div>
+<div>
+    <label>Name and Surname</label>
+    <input type="text" id="NameSurname">
+</div>
+<div>
+    <label>Aircraft marking</label>
+    <input type="text" id="marking">
+</div>
+<div>
+    <label>Coordinates</label>
+    <input type="text" id="coordinates">
+</div>
+<div>
+    <label>Radius of flight</label>
+    <input type="number" id="radius">
+</div>
+<div>
+    <label>Flight height</label>
+    <input type="text" id="height">
+</div>
+<div>
+    <label>Type of flight</label>
+    <select id="type">
+        <option></option>
+        <option>Glider</option>
+        <option>Drone</option>
+    </select>
+</div>
+<div>
+    <button onclick="LogIn()">LogIn</button>
+</div>
+<h2>Registered Flights</h2>
+<h3>
+    Number of flights that log in:
+    <span id="loggedIn">0</span>
+</h3>
+<div id="errorMessage" style="color: red;"></div>
+<ul id="add"></ul>
+</body>
+</html>
